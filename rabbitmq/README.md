@@ -1,0 +1,1 @@
+[Как запустить RabbitMQ в Docker + useful commands](https://habr.com/ru/companies/slurm/articles/704208/)

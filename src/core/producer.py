@@ -3,7 +3,8 @@ from pika import BasicProperties
 
 
 def send_message(message):
-    amqp_url = "http://localhost:5672?connection_attempts=5&retry_delay=5"
+    # amqp_url = "amqp://rmuser:rmpassword@localhost:5672?connection_attempts=5&retry_delay=5"
+    amqp_url = "amqp://rmuser:rmpassword@rabbit_mq:5672?connection_attempts=10&retry_delay=10"
     url_params = pika.URLParameters(amqp_url)
     connection = pika.BlockingConnection(url_params)
 

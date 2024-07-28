@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, Header, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 import uuid
 import uvicorn
 from typing import Optional, Annotated
@@ -28,6 +29,17 @@ def get_uuid(x_flag: Annotated[str, Depends(verify_x_flag)]):
 		producer.send_message(message)
 
 	return {"uuid": random_uuid}
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:8000",
+        "http://0.0.0.0:80",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 if __name__ == '__main__':
     uvicorn.run('main:app', host='127.0.0.1', port=8000, reload=True)

@@ -1,0 +1,14 @@
+# https://www.w3schools.com/git/git_ignore.asp?remote=github
+*.log
+
+__pycache__
+.pytest_cache
+env
+/core
+/consumer
+
+/for\ test_uuid.txt
+/PRE\ README.md
+/rabbitmq/rabbitmq/
+/rabbitmq/.erlang.cookie
+/rabbitmq/mnesia

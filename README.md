@@ -4,12 +4,8 @@ Solution is API built with framework FastAPI.
 
 Required:
 
-1. python 3.11
+python 3.11
 [direct link](https://www.python.org/ftp/python/3.11.0/python-3.11.0-amd64.exe)
-2. RabbitMQ 3.13.4
-[direct link](https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.13.4/rabbitmq-server-3.13.4.exe)
-3. Erlang 26.2.5.2
-[direct link](https://github.com/erlang/otp/releases/download/OTP-26.2.5.2/otp_win64_26.2.5.2.exe)
 
 Project can be deployed in two ways:
 
@@ -43,30 +39,23 @@ deactivate
 
 ### RabbitMQ
 
-Comand to enable RabbitMQ GUI by [link](http://127.0.0.1:15672/)
+Run
 
 ```shell
-rabbitmq-plugins enable rabbitmq_management
+docker-compose up --build
 ```
 
-* default login: guest
-* default password: guest
+in rabbitmq folder to start RabbitMQ service from docker.
 
-Other useful commands
-
-```shell
-rabbitmqctl help
-rabbitmqctl status
-rabbitmqctl shutdown
-rabbitmqctl start_app
-```
+* login: rmuser
+* password: rmpassword
 
 ### Starting development environment
 
 1. Enshure that you're using console with enabled virtual env
 2. Enshure that RabbitMQ is running
-3. Use "python src/main.py" command to start server
-4. Open another terminal, enable virtual env and use "python src/consumer.py" to start consumer
+3. Use "python src/core/main.py" command to start server
+4. Open another terminal, enable virtual env and use "python src/consumer/consumer.py" to start consumer
 
 All done! Now you can use Postman or other program to check it out.
 

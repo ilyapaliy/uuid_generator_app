@@ -1,5 +1,5 @@
 [tool.pytest.ini_options]
 pythonpath = [
-  ".", "src"
+  ".", "src/core", "src/consumer"
 ]
 asyncio_mode="auto"
