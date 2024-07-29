@@ -19,6 +19,10 @@ services:
 
   core:
     container_name: core_uuid_generator
+    environment:
+      - RABBIT_LOGIN=rmuser
+      - RABBIT_PASSWORD=rmpassword
+      - RABBIT_HOST=rabbit_mq
     build:
       context: ./src/core
       additional_contexts:
@@ -36,6 +40,10 @@ services:
 
   consumer:
     container_name: comsumer_uuid_generator
+    environment:
+      - RABBIT_LOGIN=rmuser
+      - RABBIT_PASSWORD=rmpassword
+      - RABBIT_HOST=rabbit_mq
     build:
       context: ./src/consumer
     depends_on:

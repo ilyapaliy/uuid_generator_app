@@ -1,10 +1,17 @@
 import pika
 from pika import BasicProperties
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
+RABBIT_LOGIN = os.environ.get("RABBIT_LOGIN")
+RABBIT_PASSWORD = os.environ.get("RABBIT_PASSWORD")
+RABBIT_HOST = os.environ.get("RABBIT_HOST")
 
 
 def send_message(message):
-    # amqp_url = "amqp://rmuser:rmpassword@localhost:5672?connection_attempts=5&retry_delay=5"
-    amqp_url = "amqp://rmuser:rmpassword@rabbit_mq:5672?connection_attempts=10&retry_delay=10"
+    amqp_url = f"amqp://{RABBIT_LOGIN}:{RABBIT_PASSWORD}@{RABBIT_HOST}:5672?connection_attempts=10&retry_delay=10"
     url_params = pika.URLParameters(amqp_url)
     connection = pika.BlockingConnection(url_params)
 
