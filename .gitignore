@@ -4,14 +4,13 @@
 # .env
 docker.env
 
+uuid_generator
 __pycache__
 .pytest_cache
 env
-/core
-/consumer
 
-/for\ test_uuid.txt
-/PRE\ README.md
 /rabbitmq/rabbitmq/
 /rabbitmq/.erlang.cookie
 /rabbitmq/mnesia
+
+old_files

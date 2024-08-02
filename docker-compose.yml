@@ -1,6 +1,6 @@
 version: "1"
 networks:
-  dev:
+  net:
 
 services:
   rabbit_mq:
@@ -14,42 +14,26 @@ services:
     volumes:
       - ./rabbitmq:/var/lib/rabbitmq
     networks:
-      - dev
+      - net
     restart: always
 
-  core:
-    container_name: core_uuid_generator
+  uuid_generator:
+    container_name: uuid_generator
     environment:
       - RABBIT_LOGIN=rmuser
       - RABBIT_PASSWORD=rmpassword
       - RABBIT_HOST=rabbit_mq
     build:
-      context: ./src/core
+      context: ./src
       additional_contexts:
         for_requirements: ./
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./core:/usr/src/app/core
+      - ./uuid_generator:/usr/src/app/uuid_generator
     depends_on:
         - rabbit_mq
     networks:
-      - dev
-    restart: always
-
-  consumer:
-    container_name: comsumer_uuid_generator
-    environment:
-      - RABBIT_LOGIN=rmuser
-      - RABBIT_PASSWORD=rmpassword
-      - RABBIT_HOST=rabbit_mq
-    build:
-      context: ./src/consumer
-    depends_on:
-        - rabbit_mq
-    volumes:
-      - ./consumer:/usr/src/app/consumer
-    networks:
-      - dev
+      - net
     restart: always

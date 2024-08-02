@@ -54,8 +54,7 @@ in rabbitmq folder to start RabbitMQ service from docker.
 
 1. Enshure that you're using console with enabled virtual env
 2. Enshure that RabbitMQ is running
-3. Use "python src/core/main.py" command to start server
-4. Open another terminal, enable virtual env and use "python src/consumer/consumer.py" to start consumer
+3. Use "python src/main.py" command to start server
 
 All done! Now you can use Postman or other program to check it out.
 
