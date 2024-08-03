@@ -2,6 +2,7 @@ import logging
 from aio_pika import connect_robust, Message
 import os
 from dotenv import load_dotenv
+import pickle
 
 
 load_dotenv()
@@ -31,8 +32,8 @@ class PikaProducer:
 		logger.info("Established PikaProducer connection")
 		return self.connection
 
-	async def send_message(self, message: str):
-		msg = Message(body=message.encode())
+	async def send_message(self, message):
+		msg = Message(body=pickle.dumps(message))
 		await self.channel.default_exchange.publish(
 			msg, routing_key=self.queue,
 		)

@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import asyncio
-import logging
 from contextlib import asynccontextmanager
 import routs
 from pika_consumer import PikaConsumer

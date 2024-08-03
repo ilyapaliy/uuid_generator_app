@@ -1,67 +1,77 @@
-import pytest
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
+from asgi_lifespan import LifespanManager
 from src.main import app
-import re
 import time
-# import os
-# from unittest.mock import patch
-# from httpx import AsyncClient
-# import sys
-
-uuid_pattern = '[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}'
-# uuid_pattern = '[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[a-f0-9]{4}-?[a-f0-9]{12}'
-re_uuid = re.compile('^' + uuid_pattern + '$', re.I)
+from schemas import UUIDResponse, XFlag, UUID
 
 
-# @pytest.mark.anyio
-# async def test_root():
-#     async with AsyncClient(app=app, headers={"X-Flag": "green"}, base_url="http://localhost:8000") as ac:
-#         response = await ac.get("/generate-uuid")
-#     assert response.status_code == 200
-#     uuid = response.json()["uuid"]
-#     assert re_uuid.match(uuid)
+async def test_green_flag(ac: AsyncClient, caplog):
+    ac.headers = {"X-Flag": "green"}
 
-def test_x_flag_green():
-    with TestClient(app, headers={"X-Flag": "green"}) as client:
-        response = client.get("generate-uuid")
-        assert response.status_code == 200
-        uuid = response.json()["uuid"]
-        assert re_uuid.match(uuid)
+    response = await ac.get("generate-uuid/")
+    assert response.status_code == 200
 
+    assert isinstance(UUIDResponse.model_validate_json(response.text), UUIDResponse)
 
-def test_x_flag_red():
-    with TestClient(app, headers={"X-Flag": "red"}) as client:
-        response = client.get("generate-uuid")
-        assert response.status_code == 200
-        uuid = response.json()["uuid"]
-        assert re_uuid.match(uuid)
+    words = caplog.text.split()
+    words_to_validate = []
+    for word in words:
+        if word == str(XFlag.green):
+            index = words.index(word)
+            for i in range(5):
+                words_to_validate.append(words[index - 4 + i])
 
-
-def test_is_uuid_random():
-    with TestClient(app, headers={"X-Flag": "red"}) as client:
-        response = client.get("generate-uuid")
-        uuid1 = response.json()["uuid"]
-        response = client.get("generate-uuid")
-        uuid2 = response.json()["uuid"]
-        assert uuid1 != uuid2
+    assert words_to_validate[0] == "UUID:"
+    assert UUID(words_to_validate[1])
+    assert words_to_validate[2] == "-"
+    assert words_to_validate[3] == "X-Flag:"
+    assert words_to_validate[4] == str(XFlag.green)
 
 
-# @pytest.mark.asyncio()
-# @patch("logging.root._log")
+async def test_red_flag(ac: AsyncClient, caplog):
+    ac.headers = {"X-Flag": "red"}
 
-def test_is_green_flag_logged(caplog):
-    with TestClient(app, headers={"X-Flag": "green"}) as client:
-        client.get("generate-uuid")
-        re_log = re.compile('[^"]*UUID: ' + uuid_pattern + ' - X-Flag: XFlag.green[^"]*', re.I)
-        x_flag_green_log = re_log.search(caplog.text)
-        assert x_flag_green_log != None
+    async with LifespanManager(app):
+        response = await ac.get("generate-uuid/")
+
+    assert response.status_code == 200
+    assert isinstance(UUIDResponse.model_validate_json(response.text), UUIDResponse)
+
+    time.sleep(0.2)  # work with the RabbitMQ is not instantaneous, may be failed test if no waited time
+
+    words = caplog.text.split()
+    words_to_validate = []
+    for word in words:
+        if word == str(XFlag.red):
+            index = words.index(word)
+            for i in range(5):
+                words_to_validate.append(words[index - 4 + i])
+
+    assert words_to_validate[0] == "UUID:"
+    assert UUID(words_to_validate[1])
+    assert words_to_validate[2] == "-"
+    assert words_to_validate[3] == "X-Flag:"
+    assert words_to_validate[4] == str(XFlag.red)
 
 
-def test_is_red_flag_logged(caplog):
-    with TestClient(app, headers={"X-Flag": "red"}) as client:
-        client.get("generate-uuid")
-        re_log = re.compile('[^"]*UUID: ' + uuid_pattern + ' - X-Flag: XFlag.red[^"]*', re.I)
-        time.sleep(0.3)  # work with the RabbitMQ is not instantaneous, may be failed test if no waited time
-        x_flag_red_log = re_log.search(caplog.text)
-        assert x_flag_red_log != None
+async def test_uuid_randomness(ac: AsyncClient):
+    ac.headers = {"X-Flag": "green"}
+    response = await ac.get("generate-uuid/")
+    uuid1 = UUIDResponse.model_validate_json(response.text).uuid
+    response = await ac.get("generate-uuid/")
+    uuid2 = UUIDResponse.model_validate_json(response.text).uuid
+    assert uuid1 != uuid2
 
+
+async def test_uuid_bad_flag(ac: AsyncClient):
+    ac.headers = {"X-Flag": "bad_random_text"}
+    response = await ac.get("generate-uuid/")
+    awaited_json_respose = {'detail': [{'type': 'enum', 'loc': ['header', 'X-Flag'], 'msg': "Input should be 'green' or 'red'", 'input': 'bad_random_text', 'ctx': {'expected': "'green' or 'red'"}}]}
+    assert response.json() == awaited_json_respose
+
+
+async def test_uuid_no_flag(ac: AsyncClient):
+    ac.headers = {}
+    response = await ac.get("generate-uuid/")
+    assert response.status_code == 200
+    assert isinstance(UUIDResponse.model_validate_json(response.text), UUIDResponse)

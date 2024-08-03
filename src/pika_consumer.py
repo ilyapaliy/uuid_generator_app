@@ -1,8 +1,10 @@
 import logging
-from aio_pika import connect_robust, Message
+from aio_pika import connect_robust
 import os
 from dotenv import load_dotenv
-from schemas import XFlag
+from schemas import XFlag, AMQPMessage
+import pickle
+from pickle import UnpicklingError
 
 
 load_dotenv()
@@ -31,9 +33,17 @@ class PikaConsumer:
 		return self.connection
 
 	async def process_incoming_message(self, message):
-		if message.body.decode()[-9:] == str(XFlag.red):
-			logger.info(message.body.decode())
-		await message.ack()
+		try:
+			content = pickle.loads(message.body)
+			if type(content) == AMQPMessage:
+				if content.xflag == XFlag.red:
+					logger.info(content.to_log_message())
+					await message.ack()
+		except UnpicklingError:
+			"""This message not for this consumer.
+			There are no other consumers in this project, but the task asks to log only messages with a red flag, so it implies that there are messages without this flag for other consumers as well.
+			The behavior for such messages is not described."""
+			pass
 
 	async def close_connection(self):
 		await self.channel.close()
