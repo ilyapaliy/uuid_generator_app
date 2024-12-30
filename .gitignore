@@ -1,8 +1,9 @@
+# There is nothing important, this is the test project
 # https://www.w3schools.com/git/git_ignore.asp?remote=github
 *.log
 # disable for real projects, production
 # .env
-docker.env
+# docker.env
 
 uuid_generator
 __pycache__
@@ -13,5 +14,3 @@ env
 /rabbitmq/rabbitmq/
 /rabbitmq/.erlang.cookie
 /rabbitmq/mnesia
-
-old_files
